@@ -28,7 +28,7 @@ module.exports = {
 	async execute(interaction) {
 
         if (!interaction.member.roles.cache.has(process.env.MOD_ROLE)) {
-            return await interaction.reply({ content: 'אתה חייב להיות מודרייטור כדי להשתמש בפקודה זו!', ephemeral: true });
+            return await interaction.editReply({ content: 'אתה חייב להיות מודרייטור כדי להשתמש בפקודה זו!', ephemeral: true });
         }
 
         const verifier = interaction.user 
@@ -36,7 +36,7 @@ module.exports = {
         const role = interaction.options.getRole('role')
 
         if (blockedRoleIds.includes(role.id)) {
-            return await interaction.reply({
+            return await interaction.editReply({
                 content: `❌ הרול הזה חסום ולא ניתן להוסיפו דרך הפקודה.`,
                 ephemeral: true
             });
@@ -61,9 +61,9 @@ module.exports = {
                 message_id = message.id;
             }
 
-            await interaction.reply({content: 'הרול התקבל!', ephemeral: true})
+            await interaction.editReply({content: 'הרול התקבל!', ephemeral: true})
         } catch (error) {
-            await interaction.reply({content: 'אירעה שגיאה', ephemeral: true})
+            await interaction.editReply({content: 'אירעה שגיאה', ephemeral: true})
         }
 
 	},
