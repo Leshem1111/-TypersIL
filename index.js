@@ -61,22 +61,24 @@ client.on('interactionCreate', async interaction => {
 });
 
 // Message moderation handler
-client.on('messageCreate', async message => {
-	if (message.author.bot) return;
+client.on('interactionCreate', async interaction => {
+	if (!interaction.isChatInputCommand()) return;
 
-	const blockedWordsPath = path.join(__dirname, 'blockedWords.json');
-	if (!fs.existsSync(blockedWordsPath)) return;
+	const command = client.commands.get(interaction.commandName);
+	if (!command) return;
 
-	const blockedWords = JSON.parse(fs.readFileSync(blockedWordsPath, 'utf8'));
-	const msgContent = message.content.toLowerCase();
+	try {
+		// Defer the reply to prevent timeout (if your command may take >3s)
+		await interaction.deferReply({ ephemeral: true });
+		await command.execute(interaction);
+	} catch (err) {
+		console.error(err);
 
-	for (const word of blockedWords) {
-		if (msgContent.includes(word.toLowerCase())) {
-			await message.delete();
-			await message.channel.send(`${message.author}, that word is not allowed!`).then(msg => {
-				setTimeout(() => msg.delete(), 3000);
-			});
-			break;
+		// If reply already sent or deferred, use editReply instead of reply
+		try {
+			await interaction.editReply({ content: '❌ Command failed.' });
+		} catch (editErr) {
+			console.error("❌ Failed to send failure message:", editErr);
 		}
 	}
 });
