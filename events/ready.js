@@ -8,7 +8,7 @@ module.exports = {
 
         const updateActivity = () => {
             const totalMembers = client.guilds.cache.reduce((acc, guild) => acc + guild.memberCount, 0);
-            client.user.setActivity(`Watching ${totalMembers} members`, { type: ActivityType.Playing });
+            client.user.setActivity(`${totalMembers} members`, { type: ActivityType.Watching });
         };
 
         updateActivity();
