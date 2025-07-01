@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { Client, Collection, GatewayIntentBits } = require('discord.js');
 
+// Create the Discord client with necessary intents
 const client = new Client({
 	intents: [
 		GatewayIntentBits.Guilds,
@@ -11,14 +12,14 @@ const client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMessageReactions,
-		GatewayIntentBits.GuildMembers
+		GatewayIntentBits.GuildMembers,
 	],
 });
 
-// Initialize command collection
+// Setup a collection to store all commands
 client.commands = new Collection();
 
-// Load commands
+// Load all command files
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
 
@@ -32,7 +33,7 @@ for (const file of commandFiles) {
 	}
 }
 
-// Load events
+// Load all event files
 const eventsPath = path.join(__dirname, 'events');
 const eventFiles = fs.readdirSync(eventsPath).filter(file => file.endsWith('.js'));
 
@@ -46,46 +47,10 @@ for (const file of eventFiles) {
 	}
 }
 
-// Interaction handler
-client.on('interactionCreate', async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-	const command = client.commands.get(interaction.commandName);
-	if (!command) return;
-
-	try {
-		await command.execute(interaction);
-	} catch (err) {
-		console.error(err);
-		await interaction.reply({ content: '❌ Command failed.', ephemeral: true });
-	}
-});
-
-// Message moderation handler
-client.on('interactionCreate', async interaction => {
-	if (!interaction.isChatInputCommand()) return;
-
-	const command = client.commands.get(interaction.commandName);
-	if (!command) return;
-
-	try {
-		// Defer the reply to prevent timeout (if your command may take >3s)
-		await interaction.deferReply({ ephemeral: true });
-		await command.execute(interaction);
-	} catch (err) {
-		console.error(err);
-
-		// If reply already sent or deferred, use editReply instead of reply
-		try {
-			await interaction.editReply({ content: '❌ Command failed.' });
-		} catch (editErr) {
-			console.error("❌ Failed to send failure message:", editErr);
-		}
-	}
-});
-
-// Login
+// Login to Discord
 client.login(process.env.DISCORD_TOKEN)
 	.then(() => console.log("✅ Bot logged in successfully!"))
 	.catch(err => console.error("❌ Login failed:", err));
 
+// Export for external use (e.g. deploy-commands.js)
 module.exports = client;

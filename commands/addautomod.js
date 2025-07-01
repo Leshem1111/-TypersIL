@@ -13,14 +13,21 @@ module.exports = {
 
   async execute(interaction) {
     const word = interaction.options.getString('word').toLowerCase();
-    const blockedWords = JSON.parse(fs.readFileSync('./blockedWords.json', 'utf8'));
+
+    let blockedWords;
+    try {
+      blockedWords = JSON.parse(fs.readFileSync('./blockedWords.json', 'utf8'));
+    } catch (error) {
+      blockedWords = [];
+    }
 
     if (blockedWords.includes(word)) {
-      return interaction.reply({ content: 'That word is already blocked!', ephemeral: true });
+      return interaction.editReply({ content: '⚠️ That word is already blocked!' });
     }
 
     blockedWords.push(word);
     fs.writeFileSync('./blockedWords.json', JSON.stringify(blockedWords, null, 2));
-    await interaction.reply({content: `✅ Blocked the word: **${word}**`, ephemeral:true});
+
+    await interaction.editReply({ content: `✅ Blocked the word: **${word}**` });
   }
 };
